@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Battleship: Two Player</title>
+<meta name="theme-color" content="#0b0f19">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Battleship">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#0b0f19;--p1:#0f172a;--p2:#020617;--ln:#1e293b;--ln2:#334155;--tx:#e2e8f0;--mu:#94a3b8;--dim:#64748b;--cy:#22d3ee;--cyd:#0891b2;--rd:#dc2626;--pu:#581c87;--pl:#a855f7}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.mono{font-family:ui-monospace,Consolas,monospace}
+button,input{font:inherit;color:inherit}button{cursor:pointer}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+header{position:sticky;top:0;z-index:20;background:rgba(2,6,23,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--ln);padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
+h1{font-size:18px;margin:0}h1 small{display:block;font-size:11px;font-weight:400;color:var(--mu)}
+h2{font-size:12px;margin:0 0 10px;color:#cbd5e1;letter-spacing:.06em;text-transform:uppercase}
+.bar,.row{display:flex;gap:8px;flex-wrap:wrap}.row .btn{flex:1}
+.btn{padding:9px 13px;border-radius:10px;border:1px solid var(--ln2);background:var(--ln);font-size:13px;font-weight:600}
+.btn:hover{background:var(--ln2)}.btn:disabled{opacity:.4;cursor:default}
+.btn.pri{background:var(--cyd);border-color:#06b6d4;color:#fff}.btn.dan{background:#991b1b;border-color:#dc2626;color:#fff}
+main{flex:1;width:100%;max-width:1000px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+.card{background:var(--p1);border:1px solid var(--ln);border-radius:16px;padding:16px}
+.center{text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;max-width:460px;margin:8vh auto 0;width:100%}
+.big{font-size:34px;font-weight:800;color:var(--cy);word-break:break-word}
+.center label{width:100%;text-align:left;font-size:12px;color:var(--mu)}
+input[type=text]{width:100%;margin-top:4px;background:var(--p2);border:1px solid var(--ln2);border-radius:10px;padding:11px}
+.boards{display:grid;gap:16px;grid-template-columns:1fr}@media(min-width:860px){.boards{grid-template-columns:1fr 1fr}}
+.bwrap{width:100%;max-width:520px;margin:0 auto}.small{max-width:340px}
+.cols{display:grid;grid-template-columns:repeat(11,1fr);text-align:center;font-size:12px;font-weight:700;color:var(--mu)}
+.grid{display:grid;grid-template-columns:repeat(11,1fr);gap:3px;background:var(--p2);padding:6px;border:1px solid var(--ln);border-radius:12px;margin-top:4px}
+.rl{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--dim)}
+.c{aspect-ratio:1;border-radius:7px;border:1px solid var(--ln);background:var(--p1);font-weight:800;font-size:14px;padding:0;display:flex;align-items:center;justify-content:center;color:#fff}
+button.c:hover{filter:brightness(1.3)}.small .c{font-size:10px}
+.c.S{background:#1d4ed8;border-color:#60a5fa}
+.c.MISS{background:#94a3b8;border-color:#cbd5e1;color:#020617}
+.c.HIT{background:var(--rd);border-color:#ef4444}
+.c.SUNK{background:var(--pu);border-color:var(--pl)}
+.c.sel{outline:3px solid var(--cy);outline-offset:-2px;box-shadow:0 0 12px rgba(34,211,238,.6)}
+.c.last{outline:3px solid #facc15;outline-offset:-2px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.tg{font-size:12px;color:var(--mu);display:flex;gap:6px;align-items:center;background:var(--p2);border:1px solid var(--ln);padding:6px 10px;border-radius:10px;cursor:pointer}
+.msg{padding:12px;border-radius:12px;background:rgba(8,51,68,.4);border:1px solid #155e75;font-size:14px}
+.sh{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.sh .btn{font-size:12px}.sh .btn.on{border-color:var(--cy);background:#0e7490;color:#fff}.sh .btn.dn{opacity:.6;text-decoration:line-through}
+.note{font-size:12px;color:var(--mu);margin:8px 0 0}
+table{width:100%;border-collapse:collapse;font-size:12px;text-align:left}th,td{padding:7px 8px;border-top:1px solid var(--ln)}th{color:var(--mu);border:0}
+.tag{padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:#052e16;color:#4ade80;white-space:nowrap}
+footer{border-top:1px solid var(--ln);padding:10px;text-align:center;font-size:11px;color:var(--dim)}
+#dlg{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px}
+#dlg[hidden]{display:none}
+.box{background:var(--p1);border:1px solid var(--ln2);border-radius:16px;width:100%;max-width:340px;padding:18px;display:flex;flex-direction:column;gap:8px;max-height:90vh;overflow:auto}
+.box.wide{max-width:640px}.box h3{margin:0;text-align:center;font-size:16px}.box p{margin:0 0 4px;text-align:center;font-size:12px;color:var(--mu)}
+.box .btn{padding:11px;border-radius:12px}.ghost{background:none!important;border:0!important;color:var(--dim)}
+.hi{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px;background:var(--p2);border:1px solid var(--ln);border-radius:10px;font-size:12px;cursor:pointer}
+textarea{width:100%;height:240px;background:var(--p2);color:var(--tx);border:1px solid var(--ln);border-radius:10px;padding:10px;font:12px/1.4 ui-monospace,Consolas,monospace}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;background:#0e7490;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+#toast[hidden]{display:none}
+</style></head>
+<body>
+<header>
+ <h1>BATTLESHIP<small>Two players, one device</small></h1>
+ <div class="bar">
+  <button class="btn" id="btn-install" data-a="install" hidden>Install app</button>
+  <button class="btn" data-a="history">History</button>
+  <button class="btn" id="btn-new" data-a="newgame" hidden>New game</button>
+ </div>
+</header>
+<main id="app"></main>
+<footer><span id="net">Online</span> · Games are saved on this device only</footer>
+<div id="dlg" hidden></div><div id="toast" hidden></div>
+<script>
+'use strict';
+const L='ABCDEFGHIJ'.split(''),KEY='battleship-2p.v1',$=id=>document.getElementById(id);
+const FLEET=[['carrier','Carrier',5],['battleship','Battleship',4],['cruiser','Cruiser',3],['submarine','Submarine',3],['destroyer','Destroyer',2]];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const blank=()=>[{ships:[],shots:{},heat:false},{ships:[],shots:{},heat:false}];
+let G={phase:'setup',names:['Player 1','Player 2'],p:blank(),who:0,first:0,after:'place',fired:false,last:null,log:[]},games=[],sel=null,pl={i:0,vert:false},deferred=null,pend=[],curMd='',curName='';
+
+// ---- storage (local-first) ----
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({G,games}))}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(!d)return;if(Array.isArray(d.games))games=d.games;
+ if(d.G&&d.G.p&&d.G.names){G=d.G;if(G.phase==='place'||G.phase==='turn'){G.after=G.phase;G.phase='cover'}}}catch(e){}}
+
+// ---- rules ----
+const shipAt=(p,c)=>p.ships.find(s=>s.cells.includes(c));
+const nextShip=p=>FLEET.findIndex(f=>!p.ships.some(s=>s.id===f[0]));
+const sunkShips=i=>G.p[1-i].ships.filter(s=>s.cells.every(c=>G.p[i].shots[c]));
+function newGame(names,first){G={phase:'cover',after:'place',names,p:blank(),who:0,first:first||0,fired:false,last:null,log:[]};pl={i:0,vert:false};sel=null;render()}
+function tryPlace(c){const p=G.p[G.who],ex=shipAt(p,c);
+ if(ex){p.ships=p.ships.filter(s=>s!==ex);pl.i=FLEET.findIndex(f=>f[0]===ex.id);return render()}
+ const d=FLEET[pl.i];if(!d)return toast('All ships placed');
+ const r=L.indexOf(c[0]),n=+c.slice(1),len=d[2],cs=[];
+ if(pl.vert?r+len>10:n+len>11)return toast('Does not fit there');
+ for(let k=0;k<len;k++)cs.push(pl.vert?L[r+k]+n:L[r]+(n+k));
+ if(cs.some(x=>shipAt(p,x)))return toast('Ships cannot overlap');
+ p.ships.push({id:d[0],name:d[1],len,cells:cs});pl.i=nextShip(p);render()}
+function randomize(){const p=G.p[G.who];p.ships=[];
+ FLEET.forEach(([id,name,len])=>{for(let t=0;t<500;t++){const v=Math.random()<.5,r=Math.floor(Math.random()*(v?11-len:10)),c=Math.floor(Math.random()*(v?10:11-len))+1,cs=[];
+  for(let k=0;k<len;k++)cs.push(v?L[r+k]+c:L[r]+(c+k));
+  if(!cs.some(x=>shipAt(p,x))){p.ships.push({id,name,len,cells:cs});break}}});pl.i=nextShip(p);render()}
+function doneP(){const p=G.p[G.who];if(p.ships.length<5)return;
+ if(G.who===0){G.who=1;G.after='place'}else{G.who=G.first;G.after='turn'}
+ pl={i:0,vert:false};G.phase='cover';render()}
+function fire(){const me=G.p[G.who],en=G.p[1-G.who],c=sel;if(!c||G.fired||me.shots[c])return;
+ const ship=shipAt(en,c);me.shots[c]=ship?'HIT':'MISS';let res=ship?'HIT':'MISS',sunk=null;
+ if(ship&&ship.cells.every(x=>me.shots[x])){sunk=ship.name;res='SUNK'}
+ G.last={who:G.who,coord:c,result:res,ship:sunk};G.log.push({n:G.log.length+1,player:G.who,coord:c,result:res,ship:sunk});
+ G.fired=true;sel=null;render()}
+function endTurn(){if(sunkShips(G.who).length===5)return finish();G.who=1-G.who;G.fired=false;G.after='turn';G.phase='cover';render()}
+function finish(){const st=i=>{const s=Object.values(G.p[i].shots);return{shots:s.length,hits:s.filter(x=>x==='HIT').length,sunk:sunkShips(i).length}};
+ games.unshift({id:Date.now(),ended:new Date().toISOString(),names:[...G.names],winner:G.who,turns:G.log.length,st:[st(0),st(1)],log:G.log,fleets:G.p.map(p=>p.ships.map(s=>({name:s.name,cells:s.cells}))),shots:G.p.map(p=>p.shots)});
+ G.phase='over';render()}
+function heat(sunkSet){const me=G.p[G.who],h={},left=FLEET.filter(f=>!sunkShips(G.who).some(s=>s.id===f[0])).map(f=>f[2]);
+ L.forEach(r=>{for(let n=1;n<=10;n++)h[r+n]=0});
+ left.forEach(len=>{for(let d=0;d<2;d++)for(let a=0;a<10;a++)for(let b=0;b<=10-len;b++){const cs=[];for(let k=0;k<len;k++)cs.push(d?L[b+k]+(a+1):L[a]+(b+k+1));
+  let ok=true,hits=0;cs.forEach(c=>{if(me.shots[c]==='MISS'||sunkSet.has(c))ok=false;else if(me.shots[c]==='HIT')hits++});
+  if(ok)cs.forEach(c=>{if(!me.shots[c])h[c]+=hits?10*hits:1})}});return h}
+
+// ---- views ----
+const board=(fn,cls,act)=>{let h=`<div class="bwrap ${cls||''}"><div class="cols mono"><div></div>${[1,2,3,4,5,6,7,8,9,10].map(n=>`<div>${n}</div>`).join('')}</div><div class="grid mono">`;
+ L.forEach(r=>{h+=`<div class="rl">${r}</div>`;for(let n=1;n<=10;n++){const k=r+n,o=fn(k);h+=act?`<button class="c ${o.cls||''}" data-a="cell" data-v="${k}" style="${o.st||''}" aria-label="${k}">${o.t||''}</button>`:`<div class="c ${o.cls||''}">${o.t||''}</div>`}});return h+'</div></div>'};
+const sym=s=>s==='HIT'?{cls:'HIT',t:'✕'}:s==='MISS'?{cls:'MISS',t:'•'}:null;
+function vSetup(){return`<div class="card center"><h2>New game</h2><p style="margin:0;color:var(--mu)">Each player secretly places a fleet, then you take turns firing one shot at a time. Pass the device between turns.</p>
+ <label>Player 1<input type="text" id="n0" maxlength="16" value="${esc(G.names[0])}"></label><label>Player 2<input type="text" id="n1" maxlength="16" value="${esc(G.names[1])}"></label>
+ <button class="btn pri" data-a="start" style="width:100%;padding:13px">Start game</button></div>`}
+function vCover(){return`<div class="card center"><h2>Pass the device to</h2><div class="big">${esc(G.names[G.who])}</div><p style="margin:0;color:var(--mu)">${G.after==='place'?'Place your fleet in secret.':'It is your turn to fire.'} Make sure only you can see the screen.</p><button class="btn pri" data-a="ready" style="width:100%;padding:13px">I am ready</button></div>`}
+function vPlace(){const p=G.p[G.who];
+ return`<div class="card"><div class="top"><h2 style="margin:0">${esc(G.names[G.who])}: place your fleet</h2><div class="row"><button class="btn" data-a="rot">${pl.vert?'Vertical':'Horizontal'}</button><button class="btn" data-a="rand">Random</button><button class="btn" data-a="clear">Clear</button></div></div>
+ <div class="sh">${FLEET.map((f,i)=>`<button class="btn${p.ships.some(s=>s.id===f[0])?' dn':''}${i===pl.i?' on':''}" data-a="pship" data-v="${i}">${f[1]} (${f[2]})</button>`).join('')}</div>
+ ${board(k=>shipAt(p,k)?{cls:'S'}:{},'',true)}
+ <p class="note" style="text-align:center">Tap a square to place the selected ship (it extends right or down). Tap a placed ship to pick it up.</p>
+ <button class="btn pri" data-a="done" style="width:100%;margin-top:12px;padding:13px" ${p.ships.length<5?'disabled':''}>${G.who===0?'Done, pass to '+esc(G.names[1]):'Done, start the battle'}</button></div>`}
+function vTurn(){const w=G.who,me=G.p[w],en=G.p[1-w],l=G.last,sunk=sunkShips(w),ss=new Set(sunk.flatMap(s=>s.cells));
+ let hh=null,mx=1;if(me.heat){hh=heat(ss);mx=Math.max(1,...Object.values(hh))}
+ const res=r=>r.result==='MISS'?'miss':r.result==='SUNK'?`hit and sunk the ${r.ship}`:'hit';
+ const msg=G.fired?`You fired at <b>${l.coord}</b>: ${res(l)}${sunk.length===5?'. That was the last ship!':'.'}`:l?`${esc(G.names[l.who])} fired at <b>${l.coord}</b>: ${l.result==='MISS'?'miss':l.result==='SUNK'?'your '+l.ship+' was sunk':'hit on your ship'}.`:'You fire first.';
+ const left=FLEET.filter(f=>!sunk.some(s=>s.id===f[0])).map(f=>f[1]),mine=5-sunkShips(1-w).length;
+ return`<div class="msg"><b>${esc(G.names[w])}'s turn.</b> ${msg}</div>
+ <div class="boards"><div class="card"><div class="top"><h2 style="margin:0">Enemy waters</h2><label class="tg"><input type="checkbox" data-a="heat" ${me.heat?'checked':''}> Probability heatmap</label></div>
+ ${board(k=>{const s=me.shots[k];let o=sym(s)||{};if(s==='HIT'&&ss.has(k))o={cls:'SUNK',t:'💀'};if(!s){if(hh&&hh[k]>0)o.st=`background:rgba(14,116,144,${Math.max(.15,hh[k]/mx).toFixed(2)})`;if(k===sel)o.cls='sel'}if(G.fired&&l.coord===k)o.cls=(o.cls||'')+' last';return o},'',!G.fired)}
+ <p class="note">Enemy ships afloat: ${left.join(', ')||'none'}</p>
+ <div class="row" style="margin-top:10px">${G.fired?`<button class="btn pri" data-a="end">${sunk.length===5?'See results':'End turn'}</button>`:`<button class="btn pri" data-a="fire" ${sel?'':'disabled'}>${sel?'Fire at '+sel:'Tap a square to aim'}</button>`}</div></div>
+ <div class="card"><h2>Your fleet <span style="float:right;font-weight:400;text-transform:none">${mine} of 5 afloat</span></h2>
+ ${board(k=>{const s=en.shots[k],o=sym(s)||(shipAt(me,k)?{cls:'S'}:{});if(!G.fired&&l&&l.who!==w&&l.coord===k)o.cls=(o.cls||'')+' last';return o},'small')}</div></div>`}
+function vOver(){const g=games[0],w=g.winner,o=1-w;
+ const fl=i=>board(k=>{const s=g.shots[1-i][k],sh=g.fleets[i].some(x=>x.cells.includes(k));return s==='HIT'?{cls:'HIT',t:'✕'}:s==='MISS'?{cls:'MISS',t:'•'}:sh?{cls:'S'}:{}},'small');
+ return`<div class="card center" style="margin-top:2vh"><h2>Game over</h2><div class="big">${esc(g.names[w])} wins!</div><p style="margin:0;color:var(--mu)">${g.turns} shots fired in total. ${esc(g.names[w])} finished with ${5-g.st[o].sunk} of 5 ships afloat.</p>
+ <table><tr><th></th><th>Shots</th><th>Hits</th><th>Hit rate</th><th>Sunk</th></tr>${[0,1].map(i=>`<tr><td>${esc(g.names[i])}</td><td>${g.st[i].shots}</td><td>${g.st[i].hits}</td><td>${g.st[i].shots?Math.round(g.st[i].hits/g.st[i].shots*100):0}%</td><td>${g.st[i].sunk}/5</td></tr>`).join('')}</table>
+ <div class="row" style="width:100%"><button class="btn pri" data-a="rematch">Rematch</button><button class="btn" data-a="setup">Change players</button></div><div class="row" style="width:100%"><button class="btn" data-a="expone">Export this game</button><button class="btn" data-a="history">History</button></div></div>
+ <div class="boards"><div class="card"><h2>${esc(g.names[0])}'s fleet</h2>${fl(0)}</div><div class="card"><h2>${esc(g.names[1])}'s fleet</h2>${fl(1)}</div></div>`}
+function render(){$('app').innerHTML={setup:vSetup,cover:vCover,place:vPlace,turn:vTurn,over:vOver}[G.phase]();$('btn-new').hidden=G.phase==='setup'||G.phase==='over';persist()}
+
+// ---- dialogs, history, export ----
+function dlg(h,wide){$('dlg').innerHTML=`<div class="box${wide?' wide':''}" role="dialog" aria-modal="true">${h}</div>`;$('dlg').hidden=false}
+function closeDlg(){$('dlg').hidden=true;$('dlg').innerHTML=''}
+function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2500)}
+const when=g=>new Date(g.ended).toLocaleString([],{dateStyle:'medium',timeStyle:'short'});
+const stamp=()=>new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
+const rate=s=>s.shots?Math.round(s.hits/s.shots*100):0;
+function histMd(G2){G2=[...G2].sort((a,b)=>a.id-b.id);
+ let m=`# Battleship game history\n\n**Exported:** ${new Date().toLocaleString()}\n**Games:** ${G2.length}\n\n## Summary\n\n| # | Date | Players | Winner | Shots | Winner ships left |\n| :---: | :--- | :--- | :---: | :---: | :---: |\n`;
+ G2.forEach((g,i)=>m+=`| ${i+1} | ${when(g)} | ${g.names[0]} vs ${g.names[1]} | ${g.names[g.winner]} | ${g.turns} | ${5-g.st[1-g.winner].sunk} |\n`);
+ G2.forEach((g,i)=>{m+=`\n---\n\n## Game ${i+1}: ${g.names[0]} vs ${g.names[1]}, ${when(g)}\n\n**Winner:** ${g.names[g.winner]}\n\n### Results\n\n| Player | Shots | Hits | Hit rate | Ships sunk |\n| :--- | :---: | :---: | :---: | :---: |\n`;
+  [0,1].forEach(p=>m+=`| ${g.names[p]} | ${g.st[p].shots} | ${g.st[p].hits} | ${rate(g.st[p])}% | ${g.st[p].sunk}/5 |\n`);
+  [0,1].forEach(p=>{m+=`\n### ${g.names[p]}'s fleet\n\`\`\`\n   1  2  3  4  5  6  7  8  9 10\n`;
+   L.forEach(r=>{m+=r+' ';for(let n=1;n<=10;n++){const k=r+n,s=g.shots[1-p][k],sh=g.fleets[p].some(x=>x.cells.includes(k));m+=(s==='HIT'?'X':s==='MISS'?'o':sh?'S':'.').padStart(2)+' '}m+='\n'});
+   m+='```\nS = ship, X = hit, o = enemy miss, . = empty\n'});
+  m+=`\n### Turn log\n\n| Shot | Player | Target | Result |\n| :---: | :--- | :---: | :--- |\n`+g.log.map(t=>`| ${t.n} | ${g.names[t.player]} | ${t.coord} | ${t.result==='SUNK'?'HIT, sunk '+t.ship:t.result} |`).join('\n')+'\n'});
+ return m}
+function exportDlg(text,name){curMd=text;curName=name;dlg(`<h3>Export</h3><p>Download the file, copy it, or select the text below.</p><textarea id="md" readonly></textarea><div class="row"><button class="btn pri" data-a="dl">Download .md</button><button class="btn" data-a="copy">Copy</button>${navigator.share?'<button class="btn" data-a="share">Share</button>':''}</div><button class="btn ghost" data-a="close">Close</button>`,true);$('md').value=text}
+function download(){try{const u=URL.createObjectURL(new Blob([curMd],{type:'text/markdown'})),a=document.createElement('a');a.href=u;a.download=curName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);toast('Download started')}catch(e){toast('Download blocked here. Use Copy instead.')}}
+async function copy(){try{await navigator.clipboard.writeText(curMd);toast('Copied to clipboard')}catch(e){const a=$('md');a.focus();a.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}toast(ok?'Copied to clipboard':'Press and hold to copy the selected text')}}
+async function share(){try{const f=new File([curMd],curName,{type:'text/markdown'});if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:curName});else await navigator.share({title:curName,text:curMd})}catch(e){}}
+const picked=()=>[...document.querySelectorAll('#hl input:checked')].map(i=>+i.value);
+function histDlg(){const w={};games.forEach(g=>{const n=g.names[g.winner];w[n]=(w[n]||0)+1});
+ const sum=Object.entries(w).map(([n,v])=>`${esc(n)}: ${v} win${v>1?'s':''}`).join(' · ');
+ dlg(`<h3>Game history</h3><p>${games.length?`${games.length} game${games.length>1?'s':''}. ${sum}`:'No finished games yet.'}</p><div id="hl" style="display:flex;flex-direction:column;gap:6px;overflow:auto;max-height:320px">${games.map(g=>`<label class="hi"><span style="display:flex;gap:8px;align-items:center"><input type="checkbox" value="${g.id}"><span>${when(g)}<br><span style="color:var(--mu)">${esc(g.names[0])} vs ${esc(g.names[1])}</span></span></span><span style="text-align:right"><span class="tag">${esc(g.names[g.winner])} won</span><br><span class="mono" style="color:var(--mu)">${g.turns} shots</span></span></label>`).join('')}</div><div class="row"><button class="btn" data-a="hall">Select all</button><button class="btn pri" data-a="hexp">Export selected</button><button class="btn dan" data-a="hdel">Delete selected</button></div><button class="btn ghost" data-a="close">Close</button>`,true)}
+function hdel(){pend=picked();if(!pend.length)return toast('Select at least one game');dlg(`<h3>Delete ${pend.length} game${pend.length>1?'s':''}?</h3><p>This removes them from this device and cannot be undone. Export first if you want a copy.</p><button class="btn dan" data-a="hdelgo">Delete</button><button class="btn ghost" data-a="history">Cancel</button>`)}
+
+// ---- events ----
+const A={
+ cell:v=>{if(G.phase==='place')return tryPlace(v);if(G.phase==='turn'&&!G.fired){if(G.p[G.who].shots[v])return toast('Already fired there');sel=v;render()}},
+ heat:()=>{G.p[G.who].heat=!G.p[G.who].heat;render()},
+ start:()=>{const n=i=>($('n'+i).value.trim()||'Player '+(i+1));newGame([n(0),n(1)],0)},
+ ready:()=>{G.phase=G.after;sel=null;pl.i=nextShip(G.p[G.who]);render()},
+ pship:v=>{const p=G.p[G.who],f=FLEET[+v];p.ships=p.ships.filter(s=>s.id!==f[0]);pl.i=+v;render()},
+ rot:()=>{pl.vert=!pl.vert;render()},rand:randomize,clear:()=>{G.p[G.who].ships=[];pl.i=0;render()},done:doneP,
+ fire,end:endTurn,
+ rematch:()=>newGame(G.names,1-games[0].winner),setup:()=>{G.phase='setup';render()},
+ expone:()=>exportDlg(histMd([games[0]]),`battleship-game-${stamp()}.md`),
+ history:histDlg,close:closeDlg,
+ hall:()=>{const b=[...document.querySelectorAll('#hl input')],on=b.some(i=>!i.checked);b.forEach(i=>i.checked=on)},
+ hexp:()=>{const ids=picked();if(!ids.length)return toast('Select at least one game');exportDlg(histMd(games.filter(g=>ids.includes(g.id))),`battleship-history-${stamp()}.md`)},
+ hdel,hdelgo:()=>{games=games.filter(g=>!pend.includes(g.id));persist();histDlg();toast('Deleted')},
+ newgame:()=>dlg(`<h3>Abandon this game?</h3><p>The game in progress will be lost. Finished games stay in History.</p><button class="btn dan" data-a="newgo">Abandon game</button><button class="btn ghost" data-a="close">Keep playing</button>`),
+ newgo:()=>{closeDlg();G.phase='setup';render()},
+ dl:download,copy,share,
+ install:async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;$('btn-install').hidden=true}};
+document.addEventListener('click',e=>{if(e.target.id==='dlg')return closeDlg();const b=e.target.closest('[data-a]');if(b&&A[b.dataset.a])A[b.dataset.a](b.dataset.v)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDlg()});
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('btn-install').hidden=false});
+addEventListener('appinstalled',()=>$('btn-install').hidden=true);
+const net=()=>$('net').textContent=navigator.onLine?'Online':'Offline (app still works)';
+addEventListener('online',net);addEventListener('offline',net);net();
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+load();render();
+</script></body></html>
